@@ -232,7 +232,7 @@ class TetrisEngine {
         let s = '+' + '-'.repeat(this.width) + '+\n'
         for (let r = 0; r < this.board.length; r++) {
             let row = this.board[r]
-            s += '|' + row.map((x)=>(x ? '1' : '0')).join('') + '|\n'
+            s += '|' + row.map((x)=>(x ? 'X' : ' ')).join('') + '|\n'
         }
         s += '+' + '-'.repeat(this.width) + '+\n'
         this.solidifyPiece(0)
