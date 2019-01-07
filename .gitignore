@@ -77,3 +77,5 @@ typings/
 
 # Python virutal environment
 venv/
+
+*.pyc

@@ -9,7 +9,7 @@ class Player:
         self.svModel = state_value_model
         self.exploration = exploration
 
-        self.actions = self.engine.getActionValues()
+        self.actions = self.engine.action_values()
 
     def play_episode(self):
         terminal = False
@@ -28,7 +28,7 @@ class Player:
 
         next_state_values = {}
         for action in self.actions:
-            next_state = self.engine.getNextState(action)
+            next_state, next_reward, next_done = self.engine.peek(action)
             next_state = np.array([next_state.flatten()])
             state_value = self.svModel.predict(next_state, batch_size=1)
             next_state_values[action] = state_value

@@ -40,6 +40,9 @@ def right(shape, anchor, board):
 def drop(shape, anchor, board):
     return move(shape, anchor, board, 0, +1)
 
+def hard_drop(shape, anchor, board):
+    pass # see implementation in step
+
 def rotate(shape, anchor, board):
     new_shape = rotated(shape)
     return (shape, anchor) if is_occupied(new_shape, anchor, board) else (new_shape, anchor)
@@ -59,6 +62,7 @@ class TetrisEngine:
             1: right,
             2: rotate,
             3: idle,
+            4: hard_drop
         }
         self.action_value_map = dict([(j, i) for i, j in self.value_action_map.items()])
         self.nb_actions = len(self.value_action_map)
@@ -76,13 +80,28 @@ class TetrisEngine:
         # clear after initializing
         self.clear()
 
-    def getActionValues(self):
+    def action_values(self):
         return list(self.value_action_map.keys())
 
-    def getNextState(self, action):
+    def peek(self, action):
         # Next board state given action but current state is not updated
-        dummy = np.array([[0]*10 for _ in range(20)])
-        return dummy
+        anchor = self.anchor
+        time = self.time
+        shape = self.shape
+        n_deaths = self.n_deaths
+        score = self.score
+        board = np.copy(self.board)
+
+        state, reward, done = self.step(action)
+
+        self.anchor = anchor
+        self.time = time
+        self.shape = shape
+        self.n_deaths = n_deaths
+        self.score = score
+        self.board = board
+
+        return state, reward, done
 
     def _choose_shape(self):
         maxm = max(self._shape_counts)
@@ -120,18 +139,22 @@ class TetrisEngine:
     def valid_action_count(self):
         valid_action_sum = 0
 
-        for _, fn in self.value_action_map.items():
-            # If they're equal, it is not a valid action
-            if fn(self.shape, self.anchor, self.board) != (self.shape, self.anchor):
-                valid_action_sum += 1
+        # for _, fn in self.value_action_map.items():
+        #     # If they're equal, it is not a valid action
+        #     if fn(self.shape, self.anchor, self.board) != (self.shape, self.anchor):
+        #         valid_action_sum += 1
 
         return valid_action_sum
 
     def step(self, action):
         self.anchor = (int(self.anchor[0]), int(self.anchor[1]))
-        self.shape, self.anchor = self.value_action_map[action](self.shape, self.anchor, self.board)
-        # Drop each step
-        self.shape, self.anchor = drop(self.shape, self.anchor, self.board)
+        if action == 4:
+            while not self._has_dropped():
+                self.shape, self.anchor = drop(self.shape, self.anchor, self.board)
+        else:
+            self.shape, self.anchor = self.value_action_map[action](self.shape, self.anchor, self.board)
+            # Drop each step
+            self.shape, self.anchor = drop(self.shape, self.anchor, self.board)
 
         # Update time and reward
         self.time += 1
@@ -141,12 +164,21 @@ class TetrisEngine:
         done = False
         if self._has_dropped():
             self._set_piece(True)
-            reward += 10 * self._clear_lines()
+            lines_cleared = self._clear_lines()
+            if lines_cleared == 1:
+                reward = 100
+            elif lines_cleared == 2:
+                reward = 300
+            elif lines_cleared == 3:
+                reward = 500
+            elif lines_cleared == 4:
+                reward = 800
+            # reward += 10 * self._clear_lines()
             if np.any(self.board[:, 0]):
                 self.clear()
                 self.n_deaths += 1
                 done = True
-                reward = -10
+                reward = -1000
             else:
                 self._new_piece()
 
