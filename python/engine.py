@@ -76,6 +76,14 @@ class TetrisEngine:
         # clear after initializing
         self.clear()
 
+    def getActionValues(self):
+        return list(self.value_action_map.keys())
+
+    def getNextState(self, action):
+        # Next board state given action but current state is not updated
+        dummy = np.array([[0]*10 for _ in range(20)])
+        return dummy
+
     def _choose_shape(self):
         maxm = max(self._shape_counts)
         m = [5 + maxm - x for x in self._shape_counts]
