@@ -30,7 +30,7 @@ class Player:
         for action in self.actions:
             next_state, next_reward, next_done = self.engine.peek(action)
             next_state = np.array([next_state.flatten()])
-            state_value = self.svModel.predict(next_state, batch_size=1)
+            state_value = self.svModel.predict(next_state, batch_size=1) + next_reward
             next_state_values[action] = state_value
 
         return max(next_state_values, key=next_state_values.get)
