@@ -14,6 +14,7 @@ def expectedReturns(state_rewards, discount):
 
 def calcTargets(model, states, returns, stepSize):
     values = model.predict(states)
+    returns = returns.reshape((returns.shape[0],1))
     return values + stepSize*(returns - values)
 
 def main(no_epi, exploration, discount, stepSize):
@@ -32,6 +33,7 @@ def main(no_epi, exploration, discount, stepSize):
         targets = calcTargets(model, states, returns, stepSize)
 
         model.fit(states, targets, epochs=1, batch_size=len(states))
+
 
     
 if __name__ == "__main__":
