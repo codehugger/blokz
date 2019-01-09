@@ -182,6 +182,7 @@ class TetrisEngine:
             else:
                 self._new_piece()
 
+        self.score += reward
         self._set_piece(True)
         state = np.copy(self.board)
         self._set_piece(False)
