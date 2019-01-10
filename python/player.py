@@ -15,10 +15,10 @@ class Player:
         terminal = False
         state_rewards = []
         while not terminal:
+            prev_state = self.engine.current_state()
             action = self.pick_action(explore=True)
-            prev_state = np.copy(self.engine.board)
             state, reward, done = self.engine.step(action)
-            state_rewards.append((state, reward))
+            state_rewards.append((prev_state, reward))
             terminal = done
         print("Score of episode:", self.engine.score)
         return state_rewards

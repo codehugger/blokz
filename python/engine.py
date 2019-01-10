@@ -146,6 +146,12 @@ class TetrisEngine:
 
         return valid_action_sum
 
+    def current_state(self):
+        self._set_piece(True)
+        state = np.copy(self.board)
+        self._set_piece(False)
+        return state
+
     def step(self, action):
         self.anchor = (int(self.anchor[0]), int(self.anchor[1]))
         if action == 4:
