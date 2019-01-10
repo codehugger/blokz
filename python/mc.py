@@ -5,6 +5,7 @@ from engine import TetrisEngine
 from player import Player
 from models import state_value
 
+
 def expectedReturns(state_rewards, discount):
     expReturns = []
     G = 0
@@ -26,9 +27,15 @@ def main(no_epi, exploration, discount, stepSize):
 
     steps_of_epi = []
 
+    maxscore = (0,-1000)
+
     for epi in range(no_epi):
         print("Episode:", epi)
-        state_rewards = player.play_episode()
+        state_rewards, score = player.play_episode(epi)
+
+        if score > maxscore[1]:
+            maxscore = (epi, score)
+
         state_returns = expectedReturns(state_rewards, discount)
     
         states = np.array([state.flatten() for state, _ in state_returns])
@@ -40,13 +47,13 @@ def main(no_epi, exploration, discount, stepSize):
 
         steps_of_epi.append(states.shape[0])
     
+    print("Episode with max score", maxscore)
     plt.plot(steps_of_epi)
     plt.ylabel('Steps per episode')
     plt.show()
 
-    
 if __name__ == "__main__":
-    NO_EPI = 1000
+    NO_EPI = 200
     EXPLORATION = 0.05
     DISCOUNT = 0.9
     STEP_SIZE = 1e-03

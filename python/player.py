@@ -1,3 +1,4 @@
+import os
 import random
 import numpy as np
 
@@ -11,17 +12,24 @@ class Player:
 
         self.actions = self.engine.action_values()
 
-    def play_episode(self):
+    def play_episode(self, epi):
         terminal = False
         state_rewards = []
-        while not terminal:
-            prev_state = self.engine.current_state()
-            action = self.pick_action(explore=True)
-            state, reward, done = self.engine.step(action)
-            state_rewards.append((prev_state, reward))
-            terminal = done
-        print("Score of episode:", self.engine.score)
-        return state_rewards
+        score = 0
+        curpath = os.path.abspath(os.curdir)
+        epidir = os.path.join(curpath,'episodes')
+        with open(os.path.join(epidir, str(epi)), 'w') as f:
+            while not terminal:
+                f.write(str(self.engine))
+                prev_state = self.engine.current_state()
+                action = self.pick_action(explore=True)
+                state, reward, done = self.engine.step(action)
+                state_rewards.append((prev_state, reward))
+                terminal = done
+                score += reward
+            print("Score of episode:", score)
+            self.engine.clear()
+        return state_rewards, score
 
     def pick_action(self, explore):
         if explore and random.uniform(0,1) <= self.exploration:
